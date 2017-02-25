@@ -21,4 +21,4 @@ architecture behavioral of sub_layer is
                 sbox_out => data_out(4*i+3 downto 4*i)
             );
         end generate;
-    end;
+    end behavioral;
