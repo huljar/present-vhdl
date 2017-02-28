@@ -21,53 +21,65 @@ architecture behavioral of present_top is
     signal round_counter: std_logic_vector(4 downto 0);
 
     component sub_layer
-        port(sub_in:  in std_logic_vector(63 downto 0);
-             sub_out: out std_logic_vector(63 downto 0)
+        port(data_in:  in std_logic_vector(63 downto 0);
+             data_out: out std_logic_vector(63 downto 0)
         );
     end component;
 
     component perm_layer
-        port(perm_in:  in std_logic_vector(63 downto 0);
-             perm_out: out std_logic_vector(63 downto 0)
+        port(data_in:  in std_logic_vector(63 downto 0);
+             data_out: out std_logic_vector(63 downto 0)
         );
     end component;
 
     component key_schedule
-        port(ks_in:  in std_logic_vector(79 downto 0);
-             rc:     in std_logic_vector(4 downto 0);
-             ks_out: out std_logic_vector(79 downto 0)
+        port(data_in:  	    in std_logic_vector(79 downto 0);
+             round_counter: in std_logic_vector(4 downto 0);
+             data_out:      out std_logic_vector(79 downto 0)
         );
     end component;
 
     begin
         SL: sub_layer port map(
-            sub_in => data_key_added,
-            sub_out => data_substituted
+            data_in => data_key_added,
+            data_out => data_substituted
         );
 
         PL: perm_layer port map(
-            perm_in => data_substituted,
-            perm_out => data_permuted
+            data_in => data_substituted,
+            data_out => data_permuted
         );
 
         KS: key_schedule port map(
-            ks_in => key_state,
-            rc => round_counter,
-            ks_out => key_updated
+            data_in => key_state,
+            round_counter => round_counter,
+            data_out => key_updated
         );
 
         data_key_added <= data_state xor key_state(79 downto 16);
 
-        process(clk, reset)
+        process(clk, reset, plaintext, key)
         begin
             if reset = '1' then
                 data_state <= plaintext;
                 key_state <= key;
-                round_counter <= b"00001";
+                round_counter <= "00001";
+                ciphertext <= x"0000000000000000";
             elsif rising_edge(clk) then
                 data_state <= data_permuted;
                 key_state <= key_updated;
                 round_counter <= std_logic_vector(unsigned(round_counter) + 1);
+                
+                -- when we are "past" the final round, i.e. the 31st round was finished,
+                -- the round counter addition overflows back to zero. Now set the output
+                -- signal to the ciphertext.
+                case round_counter is
+                    when "00000" => ciphertext <= data_key_added;
+                    when others => ciphertext <= x"0000000000000000";
+                end case;
+                --if round_counter = "00000" then
+                --    ciphertext <= data_key_added;
+                --end if;
             end if;
         end process;
     end behavioral;

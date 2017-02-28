@@ -1,35 +1,11 @@
-# Xilinx auxiliary files
-_xmsgs/
-_ngo/
-iseconfig/
-xlnx_auto_0_xdb/
-xst/
+# Xilinx creates a huge bunch of auxiliary files,
+# so we use a whitelisting approach here.
 
-*.bld
-*.cmd_log
-*.html
-*.ncd
-*.lso
-*.map
-*.mrp
-*.ngm
-*.xrpt
-*.ngc
-*.ngd
-*.ngr
-*.pad
-*.csv
-*.txt
-*.par
-*.pcf
-*.prj
-*.ptwx
-*.stx
-*.xml
-*.syr
-*.twr
-*.twx
-*.unroutes
-*.xpi
-*.xst
-*.gise
+# First, ignore everything in the project root
+/*
+# Now, whitelist src, sim, doc directories
+!src/
+!sim/
+!doc/
+# And the Xilinx project file
+!*.xise
