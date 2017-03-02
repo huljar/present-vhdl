@@ -56,7 +56,7 @@ ARCHITECTURE behavior OF present_tb IS
    signal plaintext : std_logic_vector(63 downto 0) := (others => '0');
    signal key : std_logic_vector(79 downto 0) := (others => '0');
    signal clk : std_logic := '0';
-   signal reset : std_logic := '1';
+   signal reset : std_logic := '0';
 
  	--Outputs
    signal ciphertext : std_logic_vector(63 downto 0);
