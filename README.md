@@ -7,4 +7,4 @@ It encrypts individual blocks of 64 bit length with a 64 bit key.
 ## License
 The code is licensed under the terms of the GNU Lesser General
 Public License (LGPL) Version 3. For more information, please see
-the LICENSE.md file.
+the [LICENSE.md](LICENSE.md) file.
