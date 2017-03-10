@@ -2,7 +2,12 @@
 
 This is an implementation of the PRESENT lightweight block cipher
 as described in [this paper](https://link.springer.com/chapter/10.1007/978-3-540-74735-2_31).
-It encrypts individual blocks of 64 bit length with a 64 bit key.
+It encrypts individual blocks of 64 bit length with an 80 bit key.
+
+## Limitations
+
+Only the version with 80-bit keys (*PRESENT-80*) is implemented
+here, not the 128-bit key version.
 
 ## License
 The code is licensed under the terms of the GNU Lesser General
