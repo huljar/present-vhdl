@@ -1,56 +1,60 @@
 --------------------------------------------------------------------------------
--- Company: 
+-- Company:
 -- Engineer:
 --
 -- Create Date:   14:37:59 02/28/2017
--- Design Name:   
+-- Design Name:
 -- Module Name:   /home/julian/Projekt/Xilinx Projects/present-vhdl/src/present_tb.vhd
 -- Project Name:  present-vhdl
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
+-- Target Device:
+-- Tool versions:
+-- Description:
+--
 -- VHDL Test Bench Created by ISE for module: present_top
--- 
+--
 -- Dependencies:
--- 
+--
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
 --
--- Notes: 
+-- Notes:
 -- This testbench has been automatically generated using types std_logic and
 -- std_logic_vector for the ports of the unit under test.  Xilinx recommends
 -- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
+-- to guarantee that the testbench will bind correctly to the post-implementation
 -- simulation model.
 --------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE std.textio.ALL;
 USE ieee.std_logic_textio.ALL;
- 
+USE work.util.ALL;
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
- 
-ENTITY present_tb IS
-END present_tb;
- 
-ARCHITECTURE behavior OF present_tb IS 
- 
+
+ENTITY present80_tb IS
+END present80_tb;
+
+ARCHITECTURE behavior OF present80_tb IS
+
     -- Component Declaration for the Unit Under Test (UUT)
- 
+
     COMPONENT present_top
+    GENERIC(
+         k : key_enum
+        );
     PORT(
          plaintext : IN  std_logic_vector(63 downto 0);
-         key : IN  std_logic_vector(79 downto 0);
+         key : IN  std_logic_vector(key_bits(k)-1 downto 0);
          clk : IN  std_logic;
          reset : IN  std_logic;
          ciphertext : OUT  std_logic_vector(63 downto 0)
         );
     END COMPONENT;
-    
+
 
    --Inputs
    signal plaintext : std_logic_vector(63 downto 0) := (others => '0');
@@ -63,11 +67,13 @@ ARCHITECTURE behavior OF present_tb IS
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
- 
+
 BEGIN
- 
+
 	-- Instantiate the Unit Under Test (UUT)
-   uut: present_top PORT MAP (
+   uut: present_top GENERIC MAP (
+          k => K_80
+        ) PORT MAP (
           plaintext => plaintext,
           key => key,
           clk => clk,
@@ -83,7 +89,7 @@ BEGIN
 		clk <= '1';
 		wait for clk_period/2;
    end process;
- 
+
 
    -- Stimulus process
    stim_proc: process
@@ -91,7 +97,7 @@ BEGIN
    begin
       -- hold reset state for 100 ns.
       wait for 100 ns;
-      
+
       -- Test the test vectors specified in the PRESENT paper.
       -- first test vector
       reset <= '1';
@@ -103,7 +109,7 @@ BEGIN
       hwrite(ct, ciphertext);
       report "Ciphertext is " & ct.all & " (expected value: 5579C1387B228445)";
       deallocate(ct);
-      
+
       -- second test vector
       reset <= '1';
       plaintext <= x"0000000000000000";
@@ -114,7 +120,7 @@ BEGIN
       hwrite(ct, ciphertext);
       report "Ciphertext is " & ct.all & " (expected value: E72C46C0F5945049)";
       deallocate(ct);
-      
+
       -- third test vector
       reset <= '1';
       plaintext <= x"FFFFFFFFFFFFFFFF";
@@ -125,7 +131,7 @@ BEGIN
       hwrite(ct, ciphertext);
       report "Ciphertext is " & ct.all & " (expected value: A112FFC72F68417B)";
       deallocate(ct);
-      
+
       -- fourth test vector
       reset <= '1';
       plaintext <= x"FFFFFFFFFFFFFFFF";
@@ -136,6 +142,7 @@ BEGIN
       hwrite(ct, ciphertext);
       report "Ciphertext is " & ct.all & " (expected value: 3333DCD3213210D2)";
       deallocate(ct);
+
       wait;
    end process;
 
