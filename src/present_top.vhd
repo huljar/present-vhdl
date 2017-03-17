@@ -1,10 +1,12 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.util.all;
 
 entity present_top is
+    generic(k: key_enum);
     port(plaintext:  in std_logic_vector(63 downto 0);
-         key:        in std_logic_vector(79 downto 0);
+         key:        in std_logic_vector(key_bits(k)-1 downto 0);
          clk:        in std_logic;
          reset:      in std_logic;
          ciphertext: out std_logic_vector(63 downto 0)
@@ -17,7 +19,7 @@ architecture behavioral of present_top is
            data_substituted,
            data_permuted: std_logic_vector(63 downto 0);
     signal key_state,
-           key_updated: std_logic_vector(79 downto 0);
+           key_updated: std_logic_vector(key_bits(k)-1 downto 0);
     signal round_counter: std_logic_vector(4 downto 0);
 
     component sub_layer
@@ -33,9 +35,10 @@ architecture behavioral of present_top is
     end component;
 
     component key_schedule
-        port(data_in:  	    in std_logic_vector(79 downto 0);
+        generic(k: key_enum);
+        port(data_in:  	    in std_logic_vector(key_bits(k)-1 downto 0);
              round_counter: in std_logic_vector(4 downto 0);
-             data_out:      out std_logic_vector(79 downto 0)
+             data_out:      out std_logic_vector(key_bits(k)-1 downto 0)
         );
     end component;
 begin
@@ -49,13 +52,15 @@ begin
         data_out => data_permuted
     );
 
-    KS: key_schedule port map(
+    KS: key_schedule generic map(
+        k => k
+    ) port map(
         data_in => key_state,
         round_counter => round_counter,
         data_out => key_updated
     );
 
-    data_key_added <= data_state xor key_state(79 downto 16);
+    data_key_added <= data_state xor key_state(key_bits(k)-1 downto key_bits(k)-64);
 
     process(clk, reset, plaintext, key)
     begin
