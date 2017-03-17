@@ -13,12 +13,11 @@ architecture structural of sub_layer is
              data_out: out std_logic_vector(3 downto 0)
         );
     end component;
-
-    begin
-        GEN_SBOXES: for i in 15 downto 0 generate
-            SX: sbox port map(
-                data_in => data_in(4*i+3 downto 4*i),
-                data_out => data_out(4*i+3 downto 4*i)
-            );
-        end generate;
-    end structural;
+begin
+    GEN_SBOXES: for i in 15 downto 0 generate
+        SX: sbox port map(
+            data_in => data_in(4*i+3 downto 4*i),
+            data_out => data_out(4*i+3 downto 4*i)
+        );
+    end generate;
+end structural;
