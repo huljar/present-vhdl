@@ -15,7 +15,7 @@ package util is
     -- The latest version of Xilinx ISE was able to synthesize
     -- the project without this workaround.
     type key_enum is (K_80, K_128, K_UNUSED);
-    type key_lookup is array(key_enum) of integer;
+    type key_lookup is array(key_enum) of natural;
     constant key_bits: key_lookup := (
         K_80  =>  80,
         K_128 => 128,
