@@ -19,6 +19,7 @@ end axi_stream_wrapper;
 
 architecture behavioral of axi_stream_wrapper is
     type state_type is (idle, read_plaintext, read_key, active, write_ciphertext);
+    type axis_buffer is array(integer range <>) of std_logic_vector(31 downto 0);
 
     constant plaintext_reads: natural := 2;
     constant key_reads: natural := 4;
@@ -27,13 +28,15 @@ architecture behavioral of axi_stream_wrapper is
 
     signal state: state_type;
     signal counter: natural range 0 to 32;
-
+    
     signal ip_plaintext: std_logic_vector(63 downto 0);
-    signal ip_key: std_logic_vector(127 downto 0);
+    signal ip_key: std_logic_vector(key_bits(k)-1 downto 0);
     signal ip_reset: std_logic;
     signal ip_ciphertext: std_logic_vector(63 downto 0);
 
-    signal write_buf: std_logic_vector(63 downto 0);
+    signal ip_plaintext_buf: axis_buffer(0 to 1);
+    signal ip_key_buf: axis_buffer(0 to 4);
+    signal ip_ciphertext_buf: axis_buffer(0 to 1);
 
     component present_top
         generic(k: key_enum);
@@ -49,11 +52,21 @@ begin
         k => k
     ) port map(
         plaintext => ip_plaintext,
-        key => ip_key(127 downto (128-key_bits(k))),
+        key => ip_key,
         clk => ACLK,
         reset => ip_reset,
         ciphertext => ip_ciphertext
     );
+    
+    ip_plaintext <= ip_plaintext_buf(0) & ip_plaintext_buf(1);
+    
+    KEY_80: if k = K_80 generate
+        ip_key <= ip_key_buf(0) & ip_key_buf(1) & ip_key_buf(2)(31 downto 16);
+    end generate;
+    
+    KEY_128: if k = K_128 generate
+        ip_key <= ip_key_buf(0) & ip_key_buf(1) & ip_key_buf(2) & ip_key_buf(3);
+    end generate;
     
     ip_reset <= '0' when state = active else '1';
     
@@ -70,7 +83,8 @@ begin
             else
                 case state is
                 when idle =>
-                    write_buf <= (others => '0');
+                    ip_ciphertext_buf(0) <= (others => '0');
+                    ip_ciphertext_buf(1) <= (others => '0');
                     M_AXIS_TDATA <= (others => '0');
                     
                     if S_AXIS_TVALID = '1' then
@@ -80,7 +94,7 @@ begin
 
                 when read_plaintext =>
                     if S_AXIS_TVALID = '1' then
-                        ip_plaintext(63-(counter*32) downto 63-(counter*32)-31) <= S_AXIS_TDATA;
+                        ip_plaintext_buf(counter) <= S_AXIS_TDATA;
                         
                         if counter = plaintext_reads-1 then
                             state <= read_key;
@@ -92,7 +106,7 @@ begin
 
                 when read_key =>
                     if S_AXIS_TVALID = '1' then
-                        ip_key(127-(counter*32) downto 127-(counter*32)-31) <= S_AXIS_TDATA;
+                        ip_key_buf(counter) <= S_AXIS_TDATA;
                         
                         if counter = key_reads-1 then
                             state <= active;
@@ -104,7 +118,8 @@ begin
 
                 when active =>
                     if counter = active_cycles-1 then
-                        write_buf <= ip_ciphertext;
+                        ip_ciphertext_buf(0) <= ip_ciphertext(63 downto 32);
+                        ip_ciphertext_buf(1) <= ip_ciphertext(31 downto 0);
                         
                         state <= write_ciphertext;
                         counter <= 0;
@@ -113,7 +128,7 @@ begin
                     end if;
 
                 when write_ciphertext =>
-                    M_AXIS_TDATA <= write_buf(63-(counter*32) downto 63-(counter*32)-31);
+                    M_AXIS_TDATA <= ip_ciphertext_buf(counter);
                     
                     if M_AXIS_TREADY = '1' then
                         if counter = ciphertext_writes-1 then

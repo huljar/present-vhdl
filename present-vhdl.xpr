@@ -31,7 +31,7 @@
     <Option Name="EnableBDX" Val="FALSE"/>
     <Option Name="DSABoardId" Val="zc702"/>
     <Option Name="DSANumComputeUnits" Val="16"/>
-    <Option Name="WTXSimLaunchSim" Val="44"/>
+    <Option Name="WTXSimLaunchSim" Val="45"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -54,13 +54,6 @@
   <FileSets Version="1" Minor="31">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
       <Filter Type="Srcs"/>
-      <File Path="$PPRDIR/src/util.vhd">
-        <FileInfo>
-          <Attr Name="Library" Val="work"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
       <File Path="$PPRDIR/src/sbox.vhd">
         <FileInfo>
           <Attr Name="Library" Val="work"/>
@@ -68,7 +61,7 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/src/perm_layer.vhd">
+      <File Path="$PPRDIR/src/util.vhd">
         <FileInfo>
           <Attr Name="Library" Val="work"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -76,6 +69,13 @@
         </FileInfo>
       </File>
       <File Path="$PPRDIR/src/sub_layer.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="work"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/src/perm_layer.vhd">
         <FileInfo>
           <Attr Name="Library" Val="work"/>
           <Attr Name="UsedIn" Val="synthesis"/>
