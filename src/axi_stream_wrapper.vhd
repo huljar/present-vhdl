@@ -18,7 +18,7 @@ entity axi_stream_wrapper is
 end axi_stream_wrapper;
 
 architecture behavioral of axi_stream_wrapper is
-    type state_type is (idle, read_plaintext, read_key, active, write_ciphertext);
+    type state_type is (idle, read_plaintext, read_key, stabilize, active, write_ciphertext);
     type axis_buffer is array(integer range <>) of std_logic_vector(31 downto 0);
 
     constant plaintext_reads: natural := 2;
@@ -35,7 +35,7 @@ architecture behavioral of axi_stream_wrapper is
     signal ip_ciphertext: std_logic_vector(63 downto 0);
 
     signal ip_plaintext_buf: axis_buffer(0 to 1);
-    signal ip_key_buf: axis_buffer(0 to 4);
+    signal ip_key_buf: axis_buffer(0 to 3);
     signal ip_ciphertext_buf: axis_buffer(0 to 1);
 
     component present_top
@@ -109,12 +109,15 @@ begin
                         ip_key_buf(counter) <= S_AXIS_TDATA;
                         
                         if counter = key_reads-1 then
-                            state <= active;
+                            state <= stabilize;
                             counter <= 0;
                         else
                             counter <= counter+1;
                         end if;
                     end if;
+
+                when stabilize =>
+                    state <= active;
 
                 when active =>
                     if counter = active_cycles-1 then

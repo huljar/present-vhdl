@@ -35,10 +35,10 @@ USE work.util.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
 
-ENTITY present80_axis_tb IS
-END present80_axis_tb;
+ENTITY present128_axis_tb IS
+END present128_axis_tb;
 
-ARCHITECTURE behavior OF present80_axis_tb IS
+ARCHITECTURE behavior OF present128_axis_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
 
@@ -85,7 +85,7 @@ BEGIN
 
 	-- Instantiate the Unit Under Test (UUT)
    uut: axi_stream_wrapper GENERIC MAP (
-          k => K_80
+          k => K_128
         ) PORT MAP (
           ACLK => ACLK,
           ARESETN => ARESETN,
@@ -119,14 +119,22 @@ BEGIN
       -- write plaintext
       ARESETN <= '1';
       S_AXIS_TVALID <= '1';
-      S_AXIS_TDATA <= (others => '0');
+      S_AXIS_TDATA <= x"01234567";
       wait for clk_period;
       assert (S_AXIS_TREADY = '1') report "ERROR: axi slave is not ready!" severity error;
-      wait for clk_period*2;
+      wait for clk_period;
+      S_AXIS_TDATA <= x"89ABCDEF";
+      wait for clk_period;
       
       -- write key
-      S_AXIS_TDATA <= (others => '1');
-      wait for clk_period*4;
+      S_AXIS_TDATA <= x"01234567";
+      wait for clk_period;
+      S_AXIS_TDATA <= x"89ABCDEF";
+      wait for clk_period;
+      S_AXIS_TDATA <= x"01234567";
+      wait for clk_period;
+      S_AXIS_TDATA <= x"89ABCDEF";
+      wait for clk_period;
       S_AXIS_TDATA <= (others => '0');
       S_AXIS_TVALID <= '0';
       wait for clk_period;
@@ -148,7 +156,7 @@ BEGIN
       
       -- print ciphertext
       hwrite(ct, ciphertext);
-      report "Ciphertext is " & ct.all & " (expected value: E72C46C0F5945049)";
+      report "Ciphertext is " & ct.all & " (expected value: 0E9D28685E671DD6)";
       deallocate(ct);
 
       wait;
